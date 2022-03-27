@@ -1,0 +1,49 @@
+QWidget#widget{
+	background:#c5c5c7;
+	border-radius:10px;
+}
+
+
+ QPushButton{
+    border:0px;
+    height:30px;
+    border-radius:15px;
+    font-family:"Microsoft YaHei";
+    font-size:15px;
+	color:white;
+    background-color:#73a3ca;
+    }
+
+ QPushButton:hover{
+    background-color:#c0a880;
+    }
+
+ QPushButton:pressed{
+    background-color:#c0a880;
+    }
+
+
+ QPushButton#close{
+     background-color: rgb(226, 0, 0, 90);
+     color: rgb(255,255,255);
+     border-radius: 8px;
+     font: 9pt "AcadEref";
+     border: 2px groove gray;
+     border-style: outset;
+     }
+ QPushButton#close:hover{
+     background-color: rgb(226, 0, 0);
+     }
+
+ QPushButton#hide{
+     background-color: rgb(82, 245, 0, 90);
+     color: rgb(255,255,255);
+     border-radius: 8px;
+     font: 9pt "AcadEref";
+     border: 2px groove gray;
+     border-style: outset;
+     }
+ QPushButton#hide:hover{
+     background-color: rgb(82, 245, 0);
+     }
+
