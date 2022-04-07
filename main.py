@@ -1,8 +1,12 @@
 import sys
+import threading
+
 from Hello import *
 from PyQt5.QtWidgets import *
-from Video_work import cvDecode, play_Work
+from Video_work import cvDecode, play_Work, socketMessage
 from PyQt5.QtCore import *
+from threading import Thread
+import time
 
 
 class CommonHelper:
@@ -76,6 +80,13 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.playwork.playLabel = self.label_video
         self.playwork.start()
 
+        self.sock = socketMessage()
+        self.sock.threadFlag = 1
+        self.sock.start()
+
+        self.RecvthreadFlag = 1
+        self.RecvHandle()
+
     def style(self):
         fileName, fileType = QFileDialog.getOpenFileName(self, "选取文件", "./", "Excel Files (*.jpg);;Excel Files (*.png)")
 
@@ -89,10 +100,12 @@ class MyWindow(QMainWindow, Ui_MainWindow):
     def load_path(self):
         self.btn_pause.setEnabled(True)
 
-        fileName, fileType = QFileDialog.getOpenFileName(self, "选取文件", "./", "Excel Files (*.mp4);;Excel Files (*.avi)")
+        fileName, fileType = QFileDialog.getOpenFileName(self, "选取文件", "./Flask_Http-File/save_file",
+                                                         "Excel Files (*.mp4);;Excel Files (*.avi)")
 
         self.decodework.changeFlag = 1
         self.decodework.video_path = r"" + fileName
+        self.decodework.save_name = r"" + fileName.split('/')[-1]
         self.decodework.capture = 0
         self.playwork.playFlag = 1
 
@@ -104,6 +117,18 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             self.btn_pause.setText("暂停")
             self.playwork.playFlag = 1
 
+    def socketMaster(self):
+        while self.RecvthreadFlag:
+            if self.sock.Received == 1:
+                time.sleep(0.4)
+                fileName = "./Flask_Http-File/save_file/{}".format(self.sock.filename)
+                self.decodework.changeFlag = 1
+                self.decodework.video_path = r"" + fileName
+                self.decodework.save_name = self.sock.name + "_{}_".format(self.sock.style) + self.sock.filename
+                self.decodework.capture = 0
+                self.playwork.playFlag = 1
+                self.sock.Received = 0
+
     def closeEvent(self, event):
         print("关闭线程")
         # Qt需要先退出循环才能关闭线程
@@ -113,6 +138,15 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         if self.playwork.isRunning():
             self.playwork.threadFlag = 0
             self.playwork.quit()
+        if self.sock.isRunning():
+            self.sock.threadFlag = 0
+            self.sock.quit()
+        if self.thread1.isAlive():
+            self.RecvthreadFlag = 0
+
+    def RecvHandle(self):
+        self.thread1 = threading.Thread(target=MyWindow.socketMaster, args=(self,))
+        self.thread1.start()
 
 
 if __name__ == "__main__":
@@ -121,6 +155,5 @@ if __name__ == "__main__":
     styleFile = './style.qss'
     qssStyle = CommonHelper.readQss(styleFile)
     myWin.setStyleSheet(qssStyle)
-
     myWin.show()
     sys.exit(app.exec_())
